@@ -1,0 +1,32 @@
+version: '2'
+services:
+    blaze-app:
+        image: blaze
+        environment:
+            - SPRING_PROFILES_ACTIVE=prod,swagger
+            - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/eureka
+            - SPRING_CLOUD_CONFIG_URI=http://admin:$${jhipster.registry.password}@jhipster-registry:8761/config
+            - SPRING_DATA_CASSANDRA_CONTACTPOINTS=blaze-cassandra
+            - JHIPSTER_SLEEP=30 # gives time for the Cassandra cluster to start and execute the migration scripts
+        ports:
+            - 8080:8080
+    blaze-cassandra:
+        extends:
+            file: cassandra-cluster.yml
+            service: blaze-cassandra
+    blaze-cassandra-node:
+        image: cassandra:3.9
+        environment:
+            - CASSANDRA_SEEDS=blaze-cassandra
+    blaze-cassandra-migration:
+        extends:
+            file: cassandra-migration.yml
+            service: blaze-cassandra-migration
+        environment:
+            - CREATE_KEYSPACE_SCRIPT=create-keyspace-prod.cql
+    jhipster-registry:
+        extends:
+            file: jhipster-registry.yml
+            service: jhipster-registry
+        environment:
+            - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:./central-config/docker-config/

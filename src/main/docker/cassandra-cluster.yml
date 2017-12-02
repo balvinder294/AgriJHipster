@@ -1,0 +1,22 @@
+version: '2'
+services:
+    blaze-cassandra:
+        image: cassandra:3.9
+        # volumes:
+        #     - ~/volumes/jhipster/blaze/cassandra/:/var/lib/cassandra/data
+        ports:
+            - 7000:7000
+            - 7001:7001
+            - 7199:7199
+            - 9042:9042
+            - 9160:9160
+    blaze-cassandra-node:
+        image: cassandra:3.9
+        environment:
+            - CASSANDRA_SEEDS=blaze-cassandra
+    blaze-cassandra-migration:
+        extends:
+            file: cassandra-migration.yml
+            service: blaze-cassandra-migration
+        environment:
+            - CREATE_KEYSPACE_SCRIPT=create-keyspace-prod.cql
